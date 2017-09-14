@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -34,24 +35,52 @@ public class Transformation {
         //System.out.println(comp(f1, f2));
         
         
-        Set<Function> functionSet = new LinkedHashSet<>();
-        functionSet.add(new Function(3, 1, 3, 4));
-        functionSet.add(new Function(3, 4, 2, 1));
+        Set<Function> functionSet1 = new LinkedHashSet<>();
+        functionSet1.add(new Function(3, 1, 3, 4));
+        functionSet1.add(new Function(3, 4, 2, 1));
         
-        System.out.println(composition(functionSet, new Function(1, 1, 1, 2)));
+        System.out.println(composition(functionSet1, new Function(1, 1, 1, 2)));
         
+        Set<Function> functionSet2 = new LinkedHashSet<>();
+        functionSet2.add(new Function(3, 5, 4, 2, 6, 8, 1, 7));
+        functionSet2.add(new Function(1, 4, 3, 2, 5, 6, 7, 8));
         
-        functionSet = new LinkedHashSet<>();
-        functionSet.add(new Function(1, 2, 4, 4, 5, 6, 7, 8, 9, 10, 11, 12));
-        functionSet.add(new Function(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1));
-        functionSet.add(new Function(2, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12));
+        System.out.println(composition(functionSet2, new Function(8, 7, 6, 5, 4, 3, 2, 1)));
         
-        System.out.println(composition(functionSet, new Function(2, 1, 4, 3, 5, 7, 7, 7, 7, 7, 7, 7)));
+        Set<Function> functionSet3 = new LinkedHashSet<>();
+        functionSet3.add(new Function(3, 3, 4, 4, 5, 5));
+        functionSet3.add(new Function(3, 4, 2, 1, 6, 6));
+        functionSet3.add(new Function(4, 4, 4, 4, 5, 5));
+        
+        System.out.println(composition(functionSet3, new Function(2, 1, 4, 3, 5, 5)));
+        
+        Set<Function> functionSet4 = new LinkedHashSet<>();
+        functionSet4.add(new Function(1, 2, 4, 4, 5, 6, 7, 8, 9, 10, 11, 12));
+        functionSet4.add(new Function(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1));
+        functionSet4.add(new Function(2, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12));
+        
+        System.out.println(composition(functionSet4, new Function(2, 1, 4, 3, 5, 7, 7, 7, 7, 7, 7, 7), 4));
+        
+        Set<Function> functionSet5 = new LinkedHashSet<>();
+        functionSet5.add(new Function(3, 3, 5, 5, 7, 7, 1, 1, 11, 12, 12, 1));
+        functionSet5.add(new Function(3, 3, 1, 1, 5, 5, 7, 7, 7, 4, 12, 11));
+        functionSet5.add(new Function(1, 1, 3, 3, 5, 5, 9, 7, 9, 9, 10, 12));
+        
+        System.out.println(composition(functionSet5, new Function(7, 7, 3, 3, 1, 1, 5, 5, 12, 11, 10, 4), 4));
+        
+        Set<Function> functionSet6 = new LinkedHashSet<>();
+        functionSet6.add(new Function(3, 4, 4, 2, 6, 8, 1, 7, 3));
+        functionSet6.add(new Function(4, 4, 4, 4, 4, 5, 5, 8, 1));
+        
+        System.out.println(composition(functionSet6, new Function(2, 1, 4, 4, 5, 6, 8, 7, 3)));
         
         
     }
     
     public static boolean composition(Set<Function> functionSet, Function function) {
+        return composition(functionSet, function, Integer.MAX_VALUE);
+    }
+    public static boolean composition(Set<Function> functionSet, Function function, int maxBreakout) {
         
         if (functionSet.size() < 1) {
             return false;
@@ -64,40 +93,52 @@ public class Transformation {
                 return true;
             }
         }
-        
-        functionSet.iterator().forEachRemaining(list -> {System.out.println(list);});
+        final Integer ind = 1;
+        functionSet.iterator().forEachRemaining(list -> {
+            System.out.println(list);
+        });
+        System.out.println("Find: " + function);
         
         
         Set<Function> functionSetNotChecked = new LinkedHashSet<>(functionSet);
         Set<Function> functionSetChecked = new LinkedHashSet<>();
         
+        int loop = 0;
         while(true) {
+            if (loop >= maxBreakout) {
+                System.out.println("Warning! Early Termination");
+                break;
+            }
+            System.out.println(loop);
             Set<Function> newFunctionSetNotChecked = new LinkedHashSet<>();
             
             Function[] notCheckedArray = functionSetNotChecked.toArray(new Function[] {});
             Function[] checkedArray = functionSetChecked.toArray(new Function[] {});
             for (int i=0; i<notCheckedArray.length; i++) {
                 for (int j=0; j<notCheckedArray.length; j++) {
+                    /*
                     Function newFunction = Function.composition(notCheckedArray[i], notCheckedArray[j]);
                     if (newFunction.equals(function)) {
                         System.out.println(newFunction);
                         return true;
                     }
-                    if (!functionSetNotChecked.contains(newFunction)) {
+                    if (!functionSetNotChecked.contains(newFunction) && !functionSetChecked.contains(newFunction)) {
                         newFunctionSetNotChecked.add(newFunction);
-                        System.out.println(newFunction);
+                    }*/
+                    if (put(functionSetChecked, functionSetNotChecked, newFunctionSetNotChecked, notCheckedArray[i], notCheckedArray[j], function)) {
+                        return true;
                     }
                     
                 }
                 for (int j=0; j<checkedArray.length; j++) {
+                    /*
                     Function newFunction = Function.composition(notCheckedArray[i], checkedArray[j]);
                     if (newFunction.equals(function)) {
                         System.out.println(newFunction);
                         return true;
                     }
-                    if (!functionSetNotChecked.contains(newFunction)) {
+                    if (!functionSetNotChecked.contains(newFunction) && !functionSetChecked.contains(newFunction)) {
                         newFunctionSetNotChecked.add(newFunction);
-                        System.out.println(newFunction);
                     }
                     
                     Function newFunctionRev = Function.composition(checkedArray[j], notCheckedArray[i]);
@@ -105,9 +146,14 @@ public class Transformation {
                         System.out.println(newFunction);
                         return true;
                     }
-                    if (!functionSetNotChecked.contains(newFunctionRev)) {
+                    if (!functionSetNotChecked.contains(newFunctionRev) && !functionSetChecked.contains(newFunction)) {
                         newFunctionSetNotChecked.add(newFunctionRev);
-                        System.out.println(newFunctionRev);
+                    }*/
+                    if (put(functionSetChecked, functionSetNotChecked, newFunctionSetNotChecked, notCheckedArray[i], checkedArray[j], function)) {
+                        return true;
+                    }
+                    if (put(functionSetChecked, functionSetNotChecked, newFunctionSetNotChecked, checkedArray[j], notCheckedArray[i], function)) {
+                        return true;
                     }
                 }
                 functionSetChecked.add(notCheckedArray[i]); //Finished checking that function
@@ -118,43 +164,59 @@ public class Transformation {
             if (functionSetNotChecked.size() < 1) {
                 break;
             }
-            
+            loop++;
             
         }
         
+        boolean isFind = functionSetChecked.contains(function);
+        if (!isFind) {
+            System.out.println("Closest: " + findClosest(functionSetChecked, function));
+        }
+        return isFind;
+    }
+    
+    public static boolean put(Set<Function> functionSetChecked, Set<Function> functionSetNotChecked, Set<Function> newFunctionSetNotChecked, Function f1, Function f2, Function solutionFunction) {
         
+        Function newFunction = Function.composition(f1, f2);
+        if (newFunction.equals(solutionFunction)) {
+            System.out.println("Answer: " + newFunction);
+            return true;
+        }
+        if (!functionSetNotChecked.contains(newFunction) && !functionSetChecked.contains(newFunction)) {
+            newFunctionSetNotChecked.add(newFunction);
+        }
+        return false;
+    }
+    
+    public static Function findClosest(Set<Function> functionSet, Function function) {
+        Function[] array = functionSet.toArray(new Function[] {});
         
-        /*
-        Set<Function> newFunctionSet = new LinkedHashSet<>(functionSet);
-        Set<Function> newFunctionSetPrime = new LinkedHashSet<>(functionSet);
+        int score = Integer.MAX_VALUE;
+        Function closest = new Function(0);
         
-        while(true) {
-            Function[] listArray = newFunctionSetPrime.toArray(new Function[] {});
-            for (int i=0; i<listArray.length; i++) {
-                for (int j=0; j<listArray.length; j++) {
-                    Function newFunction = Function.composition(listArray[i], listArray[j]);
-                    if (!newFunctionSetPrime.contains(newFunction)) {
-                        System.out.println(newFunction);
-                    }
-                    if (newFunction.equals(function)) {
-                        return true;
-                    }
-                    newFunctionSetPrime.add(newFunction);
-                    
+        for (int i=0; i<array.length; i++) {
+            Function thisFunction = array[i];
+            int thisScore = getScore(thisFunction, function);
+            if (thisScore < score) {
+                score = thisScore;
+                closest = thisFunction;
+            }
+        }
+        
+        return closest;
+    }
+    
+    public static int getScore(Function f1, Function f2) {
+        if (f1.size() == f2.size()) {
+            int score = 0;
+            for (int i=0; i<f1.size(); i++) {
+                if (!Objects.equals(f1.getMapping().get(i), f2.getMapping().get(i))) {
+                    score++;
                 }
             }
-            
-            if (newFunctionSet.equals(newFunctionSetPrime)) {
-                newFunctionSet = new LinkedHashSet<>(newFunctionSetPrime);
-                break;
-            }
-            
-            newFunctionSet = new LinkedHashSet<>(newFunctionSetPrime);
-            
+            return score;
         }
-        */
-        
-        return functionSetChecked.contains(function);
+        return Integer.MAX_VALUE;
     }
     
     //make a tree relating functions with possible combinations that leads to that function
