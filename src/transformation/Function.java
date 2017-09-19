@@ -52,7 +52,21 @@ public class Function {
         return mapping.toString(); //To change body of generated methods, choose Tools | Templates.
     }
     
+    public Function getIdentity() {
+        LinkedList<Integer> mapping = new LinkedList<>();
+        
+        for (int i=0; i<size(); i++) {
+            mapping.addLast(i+1);
+        }
+        
+        return new Function(mapping);
+    }
+    
     public static Function composition(Function f1, Function f2) {
+        Function ft = f1;
+        f1 = f2;
+        f2 = ft;
+        
         List<Integer> l1 = f1.getMapping();
         List<Integer> l2 = f2.getMapping();
         List<Integer> l3 = new LinkedList<>();
