@@ -5,13 +5,10 @@
  */
 package transformation;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -54,35 +51,47 @@ public class SearchSpace {
             return foundSolution;
         }
         
-        LinkedFunction linkedSolution = new LinkedFunction(solution);
-        
-        currentFunctions.add(new LinkedFunction(solution.size())); //Add first composition
-        
-        //System.out.println(currentFunctions);
-        //System.out.println(new LinkedFunction(solution));
+        boolean notFinished = true;
         
         int i = 0;
         
-        while (currentFunctions.size() > 0) {
-            System.out.println(i + " - " + currentFunctions.size() + " - " + currentFunctions.getLast().getCurrentAnswer());
-            Set<LinkedFunction> unvisitedSet = getAllCurrentUnvisitedCompositions();
-            
-            if (unvisitedSet.isEmpty()) {
-                currentFunctions.pollLast();
-            } else {
-                LinkedFunction bestUnvisited = getBestComposition(unvisitedSet);
-                
-                if (bestUnvisited.equals(linkedSolution)) {
-                    foundSolution = bestUnvisited;
-                    return bestUnvisited;
+        while (notFinished) {
+        
+            LinkedFunction linkedSolution = new LinkedFunction(solution);
+
+            currentFunctions.add(new LinkedFunction(solution.size())); //Add first composition
+
+            //System.out.println(currentFunctions);
+            //System.out.println(new LinkedFunction(solution));
+
+
+            while (currentFunctions.size() > 0) {
+                System.out.println(i + " - " + currentFunctions.size() + " - " + currentFunctions.getLast().getCurrentAnswer());
+                Set<LinkedFunction> unvisitedSet = getAllCurrentUnvisitedCompositions();
+
+                if (unvisitedSet.isEmpty()) {
+                    currentFunctions.pollLast();
+                } else {
+                    LinkedFunction bestUnvisited = getBestComposition(unvisitedSet);
+
+                    if (bestUnvisited.equals(linkedSolution)) {
+                        foundSolution = bestUnvisited;
+                        return bestUnvisited;
+                    }
+
+                    currentFunctions.addLast(bestUnvisited);
+                    map.put(bestUnvisited, Boolean.TRUE); //Count function as visited
+
                 }
-                
-                currentFunctions.addLast(bestUnvisited);
-                map.put(bestUnvisited, Boolean.TRUE); //Count function as visited
-                
+
+                i++;
+
             }
             
-            i++;
+            Set<LinkedFunction> fullSet = getFullCompositions(); //One round of brute force to make sure we didn't miss anything
+            if (fullSet.isEmpty()) {
+                notFinished = false;
+            }
             
         }
         
@@ -105,6 +114,37 @@ public class SearchSpace {
         return f;
     }
     
+    
+    public Set<LinkedFunction> getFullCompositions() {
+        Set<LinkedFunction> functionSet = new HashSet<>();
+        
+        for (LinkedFunction f1 : map.keySet()) {
+            for (LinkedFunction f2 : map.keySet()) {
+                LinkedFunction fog = f1.getComposition(f2);
+                LinkedFunction gof = f2.getComposition(f1);
+
+                if (checkIsAlive(fog.getCurrentAnswer())) { //Prune dead branches of the graph
+                    if (!map.getOrDefault(fog, Boolean.FALSE)) { //Prune already visited branches
+                        functionSet.add(fog);
+                    }
+                }
+
+                if (checkIsAlive(gof.getCurrentAnswer())) { //Prune dead branches of the graph
+                    if (!map.getOrDefault(gof, Boolean.FALSE)) { //Prune already visited branches
+                        functionSet.add(gof);
+                    }
+                }
+
+            }
+        }
+        
+        for (LinkedFunction f : functionSet) {
+            map.putIfAbsent(f, Boolean.FALSE);
+        }
+        
+        return functionSet;
+        
+    }
     
     public Set<LinkedFunction> getAllCurrentUnvisitedCompositions() {
         Set<LinkedFunction> functionSet = new HashSet<>();
