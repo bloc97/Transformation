@@ -18,6 +18,7 @@ def composition(functionSet, solution):
 		while len(currentFunctionList) > 0: #While there are functions to backtrack
 			unvisitedSet = set()
 			n = 0
+			lenmap = len(map)
 			#Graph building algorithm
 			func1 = currentFunctionList[-1] #Get the last function
 			for func2 in map: #Compute all the compositions, this is the branches of one point of the 'graph'
@@ -26,6 +27,7 @@ def composition(functionSet, solution):
 							#Sometimes it is better to search deeper than wider. Skipping some compositions actually accelerates the search
 							#Using probabilistic decay will prevent the algorithm from finding the shortest path, but is quicker
 					if uniform(0, 1) > 1/math.sqrt(n-40):
+					#if uniform(0, 1) > lenmap/(80*n):
 						continue
 				
 				fog = comp(func1, func2)
