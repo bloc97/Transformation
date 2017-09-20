@@ -201,7 +201,7 @@ public class SearchSpace {
                 y--;
             else {
                 assert a[x-1] == b[y-1];
-                sb.addLast(a[x-1]);
+                sb.addFirst(a[x-1]);
                 x--;
                 y--;
             }

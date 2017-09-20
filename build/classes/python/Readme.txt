@@ -1,0 +1,2 @@
+composition.py is the Brute force approach, can't solve #4 within reasonable time
+compositionAStar.py is a more efficient A* Graph Traversal algorithm, can solve the #4 problem in 18 iterations (about 10 minutes, uses 1GB of memory)
