@@ -1,5 +1,6 @@
 import py_common_subseq
-
+from random import randrange, uniform
+import math
 
 #Composition function using efficient A* Graph traversal
 def composition(functionSet, solution):
@@ -16,10 +17,17 @@ def composition(functionSet, solution):
 	while (notFinished):
 		while len(currentFunctionList) > 0: #While there are functions to backtrack
 			unvisitedSet = set()
-			
+			n = 0
 			#Graph building algorithm
 			func1 = currentFunctionList[-1] #Get the last function
 			for func2 in map: #Compute all the compositions, this is the branches of one point of the 'graph'
+				
+				if n > 50: 	#Use probabilistic decay when the composition set is very big
+							#Sometimes it is better to search deeper than wider. Skipping some compositions actually accelerates the search
+							#Using probabilistic decay will prevent the algorithm from finding the shortest path, but is quicker
+					if uniform(0, 1) > 1/math.sqrt(n-40):
+						continue
+				
 				fog = comp(func1, func2)
 				gof = comp(func2, func1)
 				
@@ -30,6 +38,8 @@ def composition(functionSet, solution):
 				if checkIsAlive(gof, solution): #Prune dead paths from graph
 					if not map.get(gof, False): #Only If 'g o f' doesn't exist or was not visited
 						unvisitedSet.add(gof)   #Add as a possible path
+						
+				n += 1
 			
 			for func in unvisitedSet: #Add them back to the map
 				map[func] = False
