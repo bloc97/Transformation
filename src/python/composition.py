@@ -1,24 +1,20 @@
-
+#Bowen Peng IFT2125 Devoir 1
 #Composition function using brute force (with pruning to accelerate search)
 def composition(functionSet, solution):
-	functionSetS = set(functionSet) #Set to keep track the state
+	functionSetS = set() #Set to keep track the state
 	functionSetP = set(functionSet) #New set to append new compositions
 	
-	while True:
+	while functionSetS != functionSetP:
+		functionSetS = set(functionSetP)
 		
 		for f1 in functionSetS: #For all pairs of functions
 			for f2 in functionSetS:
 				newF = comp(f1, f2) #Compute their composition
 				if newF == solution: #Found the solution
 					return True
-				if checkIsAlive(newF, solution): #Only add the new function to the set if the composition is valid
-					functionSetP.add(newF)
+				if checkIsAlive(newF, solution): #Prune invalid compositions
+					functionSetP.add(newF) #This extra step ensures we don't count invalid non-injective functions
 				
-		if (functionSetS == functionSetP): #If there are no more new compositions, break
-			break
-		
-		functionSetS = set(functionSetP) #Copy the new set into the old set
-		
 		
 	return solution in functionSetS #If solution is within the set, return true
 	
@@ -26,9 +22,8 @@ def composition(functionSet, solution):
 def comp(f1, f2):
 	tempList = list()
 	
-	for i,y in enumerate(f2):
-		tempList.insert(i, f1[y - 1])
-	
+	for y in f2:
+		tempList.append(f1[y-1])
 	return tuple(tempList)
 	
 	
@@ -39,14 +34,14 @@ def checkIsAlive(f, solution):
 	fB = [False] * len(f)
 	sB = [False] * len(solution)
 	
-	for i, y in enumerate(f):
+	for y in f:
 		fB[y - 1] = True
 		
-	for i, y in enumerate(solution):
+	for y in solution:
 		sB[y - 1] = True
 		
 	for i, b in enumerate(sB):
-		if b and not fB[i]:
+		if b and not fB[i]: #If sB doesn't imply fB, return false
 			return False
 			
 	return True

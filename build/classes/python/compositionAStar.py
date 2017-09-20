@@ -1,6 +1,9 @@
+#Bowen Peng IFT2125 Devoir 1
+
 import py_common_subseq
 from random import randrange, uniform
 import math
+
 
 #Composition function using efficient A* Graph traversal
 def composition(functionSet, solution):
@@ -14,21 +17,15 @@ def composition(functionSet, solution):
 	
 	notFinished = True
 	
-	while (notFinished):
-		while len(currentFunctionList) > 0: #While there are functions to backtrack
+	while (notFinished): #While we did not look at all the possible compositions
+		while len(currentFunctionList) > 0: #While the backtrack queue is not empty
 			unvisitedSet = set()
-			n = 0
-			lenmap = len(map)
+			
 			#Graph building algorithm
 			func1 = currentFunctionList[-1] #Get the last function
-			for func2 in map: #Compute all the compositions, this is the branches of one point of the 'graph'
-				
-				if n > 50: 	#Use probabilistic decay when the composition set is very big
-							#Sometimes it is better to search deeper than wider. Skipping some compositions actually accelerates the search
-							#Using probabilistic decay will prevent the algorithm from finding the shortest path, but is quicker
-					if uniform(0, 1) > 1/math.sqrt(n-40):
-					#if uniform(0, 1) > lenmap/(80*n):
-						continue
+			
+			#Compute all the compositions, this is the branches of one point of the 'graph'
+			for func2 in functionSet: #Always compute the compositions with original functions
 				
 				fog = comp(func1, func2)
 				gof = comp(func2, func1)
@@ -40,8 +37,29 @@ def composition(functionSet, solution):
 				if checkIsAlive(gof, solution): #Prune dead paths from graph
 					if not map.get(gof, False): #Only If 'g o f' doesn't exist or was not visited
 						unvisitedSet.add(gof)   #Add as a possible path
+			
+			n = 1000 #Take only n entries from the map, this allows the search to be somewhat more efficient
+			
+			i = 0
+			j = round(len(map) / n + 0.5)
+			
+			for func2 in map: #Take only some entries from the map, as to not check too many compositions per step
+							  #It is sometimes better to search deeper than wide
+							  #This makes the search much faster on some compositions
+				if (i%j != 0):
+					continue
+				i += 1
+				
+				fog = comp(func1, func2)
+				gof = comp(func2, func1)
+				
+				if checkIsAlive(fog, solution): #Prune dead paths from graph
+					if not map.get(fog, False): #Only If 'f o g' doesn't exist or was not visited
+						unvisitedSet.add(fog)   #Add as a possible path
 						
-				n += 1
+				if checkIsAlive(gof, solution): #Prune dead paths from graph
+					if not map.get(gof, False): #Only If 'g o f' doesn't exist or was not visited
+						unvisitedSet.add(gof)   #Add as a possible path
 			
 			for func in unvisitedSet: #Add them back to the map
 				map[func] = False
@@ -63,10 +81,10 @@ def composition(functionSet, solution):
 				if bestFunction == solution: #Found the solution!
 					return True
 				
-				currentFunctionList.append(bestFunction) #Add to the list for backtracking
+				currentFunctionList.append(bestFunction) #Didn't find solution, Add the best one so far to the list for backtracking
 				map[bestFunction] = True #Set the function to 'visited'
 				
-		#One round of brute force composition to make sure we didn't miss anything while backtracking
+		#One round of brute force composition to make sure we didn't miss anything while backtracking to the beginning
 		unvisitedFullSet = set()
 		
 		for func1 in map:
@@ -87,6 +105,21 @@ def composition(functionSet, solution):
 			
 		if len(unvisitedFullSet) == 0:
 			break
+		else: #Restart the A* algorithm with this new entry point
+			bestScore = -1
+			bestFunction = None
+			
+			for thisFunction in unvisitedFullSet: #Find the best scoring function
+				thisScore = score(thisFunction, solution)
+				if thisScore > bestScore:
+					bestFunction = thisFunction
+					bestScore = thisScore
+			
+			if bestFunction == solution: #Found the solution!
+				return True
+			
+			currentFunctionList.append(bestFunction) #Didn't find solution, Add the best one so far to the list for backtracking
+			map[bestFunction] = True #Set the function to 'visited'
 		
 		
 	return solution in map
@@ -100,10 +133,10 @@ def checkIsAlive(f, solution):
 	fB = [False] * len(f)
 	sB = [False] * len(solution)
 	
-	for i, y in enumerate(f):
+	for y in f:
 		fB[y - 1] = True
 		
-	for i, y in enumerate(solution):
+	for y in solution:
 		sB[y - 1] = True
 		
 	for i, b in enumerate(sB):
@@ -126,12 +159,12 @@ def getIdentity(f):
 def comp(f1, f2):
 	tempList = list()
 	
-	for i, y in enumerate(f2):
+	for y in f2:
 		tempList.append(f1[y - 1])
 	
 	return tuple(tempList)
 	
-#The score used to search the graph is the count of subsequences between 'f' and 'solution'
+#The score used to traverse the graph is the count of subsequences between 'f' and 'solution'
 def score(f, solution):
 	return py_common_subseq.count_common_subsequences(f, solution)
 	
