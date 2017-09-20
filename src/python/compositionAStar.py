@@ -3,7 +3,6 @@ import py_common_subseq
 
 #Composition function using efficient A* Graph traversal
 def composition(functionSet, solution):
-
 	map = {} #Maps compositions of functions to if they are visited, used for graph traversal
 	
 	for func in functionSet: #Set all functions to 'not visited'
@@ -15,7 +14,6 @@ def composition(functionSet, solution):
 	notFinished = True
 	
 	while (notFinished):
-	
 		while len(currentFunctionList) > 0: #While there are functions to backtrack
 			unvisitedSet = set()
 			
@@ -74,6 +72,9 @@ def composition(functionSet, solution):
 		
 		for func in unvisitedFullSet:
 			map[func] = False
+			
+		if len(unvisitedFullSet) == 0:
+			break
 		
 		
 	return solution in map
@@ -122,14 +123,6 @@ def comp(f1, f2):
 def score(f, solution):
 	return py_common_subseq.count_common_subsequences(f, solution)
 	
-	
-#Returns the index of a subsequence within a bigger sequence
-def subsequenceIndex(largeList, subList):
-	for i in range(len(largeList)):
-		if largeList[i:i+len(subList)] == subList:
-			return i
-			
-	return -1
 	
 
 f11 = tuple([3, 1, 3, 4]) # 1->3 2->1 3->3 4->4
